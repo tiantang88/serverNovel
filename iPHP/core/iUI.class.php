@@ -67,6 +67,7 @@ class iUI extends iPagination{
 		$_GET['callback'] && $json = htmlspecialchars($_GET['callback']).'(' . $json . ')';
 		$_GET['script'] && exit("<script>{$json};</script>");
 		if ($ret) {
+
 			return $json;
 		}
 		echo $json;
@@ -89,6 +90,24 @@ class iUI extends iPagination{
 		}
 		return $a;
 	}
+
+    /**
+     * 消息提示
+     * @param int $code
+     * @param string $msg
+     * @param string $data
+     * @return array
+     */
+    public static function json_code($code = 0, $msg = '', $data = '') {
+        if(is_array($msg)||@strstr($msg, ':')){
+            $msg = iUI::lang($msg, false);
+        }
+        $a = array('code' => $code, 'msg' => $msg, 'data' => $data);
+        iUI::json($a);
+        return $a;
+    }
+
+
 	public static function msg($info, $ret = false) {
         if(strpos($info,':#:')===false){
             $msg = $info;

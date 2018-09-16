@@ -15,12 +15,17 @@ class indexApp {
             $domain = $this->domain();
             if($domain) return;
         }
+
         return $this->index($a);
     }
     public function API_iCMS(){
+
+
         return $this->do_iCMS();
     }
     private function index($a = null){
+
+
         $index_name = $a[1]?:iCMS::$config['template']['index']['name'];
         $index_name OR $index_name = 'index';
         $index_tpl  = $a[0]?:iView::$config['template']['index'];
@@ -28,6 +33,7 @@ class indexApp {
         if(iView::$gateway=="html" || iCMS::$config['template']['index']['rewrite']){
             $rule = $index_name.iCMS::$config['router']['ext'];
         }
+
         $iurl = (array)iURL::get('index',array('rule'=>$rule));
         $rule=='{PHP}' OR iURL::page_url($iurl);
 
@@ -35,8 +41,31 @@ class indexApp {
             appsApp::redirect_html($iurl);
         }
 
-        iView::set_iVARS($iurl,'iURL');
+        
+//        iView::set_iVARS($iurl,'iURL');
+        $page  = (int)($_GET['page']??1);
+        $pageSize = 10;
+        $vars = [
+//            'loop'=>10,
+//            'page'=>1,
+            'offset'=>($page-1)*$pageSize,
+            'tags'=>2,
+            'sub'=>'all',
+            'row'=>$pageSize,
+            'app'=>'article',
+            'method'=>'list',
+            ];
+
+           $a =  articleFunc::article_list($vars);
+        // echo "<pre>";
+        // print_r($a);
+        // exit;
+          $b= iUI::json_code(0,'',$a);
+
         $view = iView::render($index_tpl,'index');
+
+
+
         if($view) return array($view,$iurl);
     }
     public function domain(){
