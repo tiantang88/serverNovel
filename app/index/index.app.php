@@ -26,20 +26,20 @@ class indexApp {
     private function index($a = null){
 
 
-        $index_name = $a[1]?:iCMS::$config['template']['index']['name'];
-        $index_name OR $index_name = 'index';
-        $index_tpl  = $a[0]?:iView::$config['template']['index'];
-        $rule = '{PHP}';
-        if(iView::$gateway=="html" || iCMS::$config['template']['index']['rewrite']){
-            $rule = $index_name.iCMS::$config['router']['ext'];
-        }
+        // $index_name = $a[1]?:iCMS::$config['template']['index']['name'];
+        // $index_name OR $index_name = 'index';
+        // $index_tpl  = $a[0]?:iView::$config['template']['index'];
+        // $rule = '{PHP}';
+        // if(iView::$gateway=="html" || iCMS::$config['template']['index']['rewrite']){
+        //     $rule = $index_name.iCMS::$config['router']['ext'];
+        // }
 
-        $iurl = (array)iURL::get('index',array('rule'=>$rule));
-        $rule=='{PHP}' OR iURL::page_url($iurl);
+        // $iurl = (array)iURL::get('index',array('rule'=>$rule));
+        // $rule=='{PHP}' OR iURL::page_url($iurl);
 
-        if(iCMS::$config['template']['index']['mode'] && iPHP_DEVICE=="desktop"){
-            appsApp::redirect_html($iurl);
-        }
+        // if(iCMS::$config['template']['index']['mode'] && iPHP_DEVICE=="desktop"){
+        //     appsApp::redirect_html($iurl);
+        // }
 
         
 //        iView::set_iVARS($iurl,'iURL');
@@ -56,11 +56,26 @@ class indexApp {
             'method'=>'list',
             ];
 
+            $newList = array();
            $a =  articleFunc::article_list($vars);
-        // echo "<pre>";
-        // print_r($a);
-        // exit;
-          $b= iUI::json_code(0,'',$a);
+           if (is_array($a) && !empty($a)){
+
+            foreach ($a as $keys=>$values) {
+
+               $newList[] = [
+                'id' =>$values['id'],
+                'description' =>$values['description'],
+               ]; 
+            }
+
+            return iUI::json_code(0,'',$newList);
+
+           } else {
+
+            return iUI::json_code(1,'',$newList);
+
+           }
+          
 
         $view = iView::render($index_tpl,'index');
 
