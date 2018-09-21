@@ -12,7 +12,7 @@ class appsApp {
     public $_app     = null;
     public $_primary ='id';
     public $_table   = null;
-    public $methods  = array('iCMS','clink','search','hits','vote','comment');
+    public $methods  = array('iCMS','clink','search','hits','vote','comment','register');
 
     public static $s_app  = null;
     public static $config  = null;
@@ -42,6 +42,8 @@ class appsApp {
         }
         return array($v,$p,$f);
     }
+
+
     public function do_iCMS($a = null) {
         list($v,$p,$f) = $this->gets();
         $func = $this->_app;
@@ -57,6 +59,8 @@ class appsApp {
         $app = new searchApp();
         return $app->search('{iTPL}/'.$this->_app.'.search.htm');
     }
+
+
     public function API_iCMS() {
         return $this->do_iCMS();
     }
@@ -66,6 +70,7 @@ class appsApp {
     public function API_search($a = null) {
         return $this->do_search($a);
     }
+
     public function API_hits($id = null) {
         list($name,$primary,$table) = array($this->_app,$this->_primary,$this->_table);
 
@@ -272,5 +277,7 @@ class appsApp {
             self::redirect_html($iurl);
         }
     }
+
+
 
 }

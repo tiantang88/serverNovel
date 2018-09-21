@@ -8,7 +8,7 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class indexApp {
-	public $methods	= array('iCMS');
+	public $methods	= array('iCMS','andVersion');
     public function __construct() {}
     public function do_iCMS($a = null) {
         if(iView::$gateway!="html"){
@@ -20,29 +20,9 @@ class indexApp {
     }
     public function API_iCMS(){
 
-
         return $this->do_iCMS();
     }
     private function index($a = null){
-
-
-        // $index_name = $a[1]?:iCMS::$config['template']['index']['name'];
-        // $index_name OR $index_name = 'index';
-        // $index_tpl  = $a[0]?:iView::$config['template']['index'];
-        // $rule = '{PHP}';
-        // if(iView::$gateway=="html" || iCMS::$config['template']['index']['rewrite']){
-        //     $rule = $index_name.iCMS::$config['router']['ext'];
-        // }
-
-        // $iurl = (array)iURL::get('index',array('rule'=>$rule));
-        // $rule=='{PHP}' OR iURL::page_url($iurl);
-
-        // if(iCMS::$config['template']['index']['mode'] && iPHP_DEVICE=="desktop"){
-        //     appsApp::redirect_html($iurl);
-        // }
-
-        
-//        iView::set_iVARS($iurl,'iURL');
         $page  = (int)($_GET['page']??1);
         $pageSize = 10;
         $vars = [
@@ -99,5 +79,68 @@ class indexApp {
             }
         }
         return false;
+    }
+
+
+    /**
+     * android 版本更新  最新版本
+     *
+     * 返回
+     * 1、force 是否强制
+     * 2、url 下载地址
+     * 3、note 更新日志
+     * 4、apk大小
+     */
+    public function do_andVersion($version, $os)
+    {
+
+        $params['os']   =   $os;
+        $params['version']  =   $version;
+
+
+        $currentVersionModel = appversion::getCurrentVersion($params['os'], $params['version']);
+        $lastVersionModel = AppVersion::getLastVersion($params['os']);
+
+
+        if (!$currentVersionModel && $lastVersionModel) {
+            return $this->respond([
+                'force' => 'NO',
+                'download_uri' => $lastVersionModel->download_uri,//$lastVersionModel->download_uri ? $this->_parseDownloadUri($params['version']):'',
+                'note'  => $lastVersionModel->note,
+                'new_version' => 'NO'
+            ]);
+        }
+
+        if (!$lastVersionModel) {
+            return $this->failed(ApiStatus::CODE_20005, '不存在任何版本');
+        }
+
+
+        if ($currentVersionModel->version < $lastVersionModel->version) {
+            $data['download_uri'] =  $lastVersionModel->download_uri;// ? $this->_parseDownloadUri($params['version']):'';//$lastVersionModel->download_uri;
+            $data['force'] = $currentVersionModel->isForce();
+            $data['note'] = $lastVersionModel->note;
+            $data['new_version'] = 'YES';
+        } else {
+            $data['download_uri'] = '';
+            $data['note'] = '';
+            $data['force'] = 'NO';
+            $data['new_version'] = 'NO';
+        }
+
+        return $this->respond($data);
+    }
+
+
+    public function API_andVersion(){
+
+        $version = iSecurity::escapeStr($_POST['version']);
+        $os = iSecurity::escapeStr($_POST['os']);
+        if (empty($version) || empty($os)) {
+
+            return iUI::json_code(-1,'参数有误');
+        }
+
+        return $this->do_andVersion($version, $os);
     }
 }
